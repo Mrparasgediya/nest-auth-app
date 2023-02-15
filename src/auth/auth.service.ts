@@ -45,7 +45,7 @@ export default class AuthService {
     if (!compareSync(password, foundUser.password)) {
       throw new BadRequestException('Invalid Password!');
     }
-    const accessToken = this.jwtService.sign(password);
+    const accessToken = this.jwtService.sign({ id: foundUser.id });
 
     return { accessToken };
   }
