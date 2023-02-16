@@ -1,14 +1,37 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Pokemon } from '@prisma/client';
+import { Pokemon, Power } from '@prisma/client';
 import PrismaService from 'src/prisma/prisma.service';
 import PokemonDto from './dto/pokemon.dto';
 
+type PokemonResponse = Pokemon & { powers: Power[] };
 @Injectable()
 export class PokemonService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  findAllPokemon(): Promise<Pokemon[]> {
-    return this.prismaService.pokemon.findMany();
+  private getTransformedPokemonForResponse(pokemon: any): PokemonResponse {
+    const { PowerPokemon, ...restPokemonFields } = pokemon;
+    return {
+      ...restPokemonFields,
+      powers: PowerPokemon.map((currPower) => currPower.power),
+    };
+  }
+
+  findAllPokemon(): Promise<PokemonResponse[]> {
+    return this.prismaService.pokemon
+      .findMany({
+        include: {
+          PowerPokemon: {
+            select: {
+              power: {},
+            },
+          },
+        },
+      })
+      .then((pokemons) =>
+        pokemons.map((currPokemon) =>
+          this.getTransformedPokemonForResponse(currPokemon),
+        ),
+      );
   }
 
   savePokemon(pokemon: PokemonDto) {
@@ -29,12 +52,19 @@ export class PokemonService {
   }
 
   async getPokemonById(id: number): Promise<Pokemon> {
-    const foundPokemon: Pokemon = await this.prismaService.pokemon.findFirst({
+    const foundPokemon = await this.prismaService.pokemon.findFirst({
       where: { id },
+      include: {
+        PowerPokemon: {
+          select: {
+            power: {},
+          },
+        },
+      },
     });
     if (!foundPokemon) {
       throw new NotFoundException('Pokemon not found!');
     }
-    return foundPokemon;
+    return this.getTransformedPokemonForResponse(foundPokemon);
   }
 }
