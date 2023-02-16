@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Pokemon } from '@prisma/client';
 import PrismaService from 'src/prisma/prisma.service';
 import PokemonDto from './dto/pokemon.dto';
@@ -26,5 +26,15 @@ export class PokemonService {
         },
       },
     });
+  }
+
+  async getPokemonById(id: number): Promise<Pokemon> {
+    const foundPokemon: Pokemon = await this.prismaService.pokemon.findFirst({
+      where: { id },
+    });
+    if (!foundPokemon) {
+      throw new NotFoundException('Pokemon not found!');
+    }
+    return foundPokemon;
   }
 }

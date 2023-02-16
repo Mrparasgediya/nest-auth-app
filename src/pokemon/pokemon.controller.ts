@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import PokemonDto from './dto/pokemon.dto';
 import { PokemonService } from './pokemon.service';
 
@@ -13,5 +13,10 @@ export class PokemonController {
   @Post()
   savePokemons(@Body() pokemon: PokemonDto) {
     return this.pokemonService.savePokemon(pokemon);
+  }
+
+  @Get(':id')
+  getPokemonById(@Param() params) {
+    return this.pokemonService.getPokemonById(+params.id);
   }
 }
