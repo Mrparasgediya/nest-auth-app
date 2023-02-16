@@ -5,6 +5,7 @@ import BookMarkModule from './bookmarks/bookmarks.module';
 import { CoreModule } from './core/core.module';
 import { validate } from './core/env.validation';
 import { UsersModule } from './users/users.module';
+import { PokemonModule } from './pokemon/pokemon.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     BookMarkModule,
+    PokemonModule,
   ],
   controllers: [],
   providers: [],
