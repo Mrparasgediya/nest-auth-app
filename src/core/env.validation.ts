@@ -1,10 +1,10 @@
 import { ValidationError } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { IsNotEmpty, IsString, IsNumber, validateSync } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, validateSync } from 'class-validator';
 
 class EnvironmentVariables {
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
   PORT: number;
   @IsNotEmpty()
   @IsString()
