@@ -35,14 +35,14 @@ export class PokemonService {
   }
 
   savePokemon(pokemon: PokemonDto) {
-    const { imageUrl, name, power } = pokemon;
+    const { imageUrl, name, powers } = pokemon;
     return this.prismaService.pokemon.create({
       data: {
         imageUrl,
         name,
         PowerPokemon: {
           createMany: {
-            data: power.map((powerId) => ({
+            data: powers.map((powerId) => ({
               powerId,
             })),
           },
@@ -66,5 +66,17 @@ export class PokemonService {
       throw new NotFoundException('Pokemon not found!');
     }
     return this.getTransformedPokemonForResponse(foundPokemon);
+  }
+
+  async deleteById(id: number) {
+    await this.prismaService.powerPokemon.deleteMany({
+      where: {
+        pokemonId: id,
+      },
+    });
+
+    await this.prismaService.pokemon.delete({
+      where: { id },
+    });
   }
 }

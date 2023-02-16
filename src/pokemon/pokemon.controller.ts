@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { get } from 'http';
 import PokemonDto from './dto/pokemon.dto';
 import { PokemonService } from './pokemon.service';
 
@@ -19,4 +20,14 @@ export class PokemonController {
   getPokemonById(@Param() params) {
     return this.pokemonService.getPokemonById(+params.id);
   }
+
+  @Delete(':id')
+  deletePokemonById(@Param() params) {
+    return this.pokemonService.deleteById(+params.id);
+  }
+
+  // @Get(':id/powers')
+  // getPokemonPowers(@Param() Params){
+  //   return this.pokemonService.
+  // }
 }

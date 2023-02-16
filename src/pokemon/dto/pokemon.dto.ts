@@ -6,5 +6,5 @@ export default class PokemonDto {
   @IsNotEmpty()
   imageUrl: string;
   @IsNotEmpty()
-  power: number[];
+  powers: number[];
 }

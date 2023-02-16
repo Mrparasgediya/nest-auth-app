@@ -6,6 +6,7 @@ import { CoreModule } from './core/core.module';
 import { validate } from './core/env.validation';
 import { UsersModule } from './users/users.module';
 import { PokemonModule } from './pokemon/pokemon.module';
+import PowerModule from './power/power.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PokemonModule } from './pokemon/pokemon.module';
     AuthModule,
     BookMarkModule,
     PokemonModule,
+    PowerModule,
   ],
   controllers: [],
   providers: [],
