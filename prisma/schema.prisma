@@ -31,3 +31,30 @@ model BookMark {
 
   @@map("bookmark")
 }
+
+model Pokemon {
+  id           Int            @id @default(autoincrement())
+  name         String
+  imageUrl     String
+  PowerPokemon PowerPokemon[]
+
+  @@map("pokemon")
+}
+
+model Power {
+  id           Int            @id @default(autoincrement())
+  name         String
+  PowerPokemon PowerPokemon[]
+
+  @@map("power")
+}
+
+model PowerPokemon {
+  id        Int     @id @default(autoincrement())
+  pokemonId Int
+  pokemon   Pokemon @relation(fields: [pokemonId], references: [id])
+  powerId   Int
+  power     Power   @relation(fields: [powerId], references: [id])
+
+  @@map("pokemon_power")
+}
