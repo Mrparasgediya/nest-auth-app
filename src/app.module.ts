@@ -1,11 +1,21 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import AuthModule from './auth/auth.module';
 import BookMarkModule from './bookmarks/bookmarks.module';
 import { CoreModule } from './core/core.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [CoreModule, UsersModule, AuthModule, BookMarkModule],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+    CoreModule,
+    UsersModule,
+    AuthModule,
+    BookMarkModule,
+  ],
   controllers: [],
   providers: [],
 })
