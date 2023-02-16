@@ -37,12 +37,12 @@ export default class BookMarkService {
     return this.userStore.findUserById(user.id);
   }
 
-  addBookMark(bookMarkData: BookMarkDTO, headers: Headers) {
+  addBookMark(bookMarkData: BookMarkDTO, userId: string) {
     const { description, name, url } = bookMarkData;
-    const foundUser: UserEntity = this.getUserFromAuthorizationHeader(
-      headers['authorization'],
-    );
-
+    const foundUser = this.userStore.findUserById(userId);
+    if (!foundUser) {
+      throw new NotFoundException('User not found!');
+    }
     const newBookMark: BookMarkEntity = {
       description,
       id: randomUUID(),
@@ -54,19 +54,21 @@ export default class BookMarkService {
     return newBookMark;
   }
 
-  getBookMarks(headers: Headers) {
-    const foundUser = this.getUserFromAuthorizationHeader(
-      headers['authorization'],
-    );
+  getBookMarks(userId: string) {
+    const foundUser = this.userStore.findUserById(userId);
+    if (!foundUser) {
+      throw new NotFoundException('User not found!');
+    }
     return this.bookMarkStore
       .getBookMarks()
       .filter((currBookMark) => currBookMark.userId === foundUser.id);
   }
 
-  getBookMarkById(id: string, headers: Headers) {
-    const foundUser = this.getUserFromAuthorizationHeader(
-      headers['authorization'],
-    );
+  getBookMarkById(id: string, userId: string) {
+    const foundUser = this.userStore.findUserById(userId);
+    if (!foundUser) {
+      throw new NotFoundException('User not found!');
+    }
     const foundBookMark = this.bookMarkStore.findBookMarkOfUserById(
       id,
       foundUser.id,
@@ -77,10 +79,11 @@ export default class BookMarkService {
     return foundBookMark;
   }
 
-  deleteBookMark(id: string, headers: Headers) {
-    const foundUser = this.getUserFromAuthorizationHeader(
-      headers['authorization'],
-    );
+  deleteBookMark(id: string, userId: string) {
+    const foundUser = this.userStore.findUserById(userId);
+    if (!foundUser) {
+      throw new NotFoundException('User not found!');
+    }
     const foundBookMark = this.bookMarkStore.findBookMarkOfUserById(
       id,
       foundUser.id,
@@ -91,10 +94,11 @@ export default class BookMarkService {
     this.bookMarkStore.deleteBookMarkById(id, foundUser.id);
   }
 
-  updateBookMark(id: string, headers: Headers, bookMarkData: BookMarkDTO) {
-    const foundUser = this.getUserFromAuthorizationHeader(
-      headers['authorization'],
-    );
+  updateBookMark(id: string, userId: string, bookMarkData: BookMarkDTO) {
+    const foundUser = this.userStore.findUserById(userId);
+    if (!foundUser) {
+      throw new NotFoundException('User not found!');
+    }
     const foundBookMark = this.bookMarkStore.findBookMarkOfUserById(
       id,
       foundUser.id,

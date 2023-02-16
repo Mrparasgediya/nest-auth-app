@@ -16,11 +16,6 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log(
-      plainToClass(JwtPayload, payload, {
-        excludeExtraneousValues: true,
-      }),
-    );
     return plainToClass(JwtPayload, payload, {
       excludeExtraneousValues: true,
     });

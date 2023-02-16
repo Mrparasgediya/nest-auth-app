@@ -8,10 +8,10 @@ export class UserStore {
   constructor() {
     this.users = [
       {
-        id: '236ea4a6-e329-4ca8-9836-aeb15a3cffe4',
-        email: 'john@gmail.com',
+        id: 'd81f65b7-6126-45c8-8009-1525014e6537',
+        email: 'joh11n@gmail.com',
         password:
-          '$2b$10$B3y0pLynLM7JXUp0X8UIm.8FH.gSqrzm61KxcxCSGFOEBhv3D1yCe',
+          '$2b$10$Z31MVNXbJ.uCN466Duazou6mQ5QfoUjcB4THqu5AxZr0qcC71Sseu',
       },
     ];
   }

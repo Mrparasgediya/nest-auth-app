@@ -29,6 +29,8 @@ export default class AuthService {
     };
     this.userStore.addUser(newUser);
 
+    console.log(newUser);
+
     return {
       id: newUser.id,
       email,

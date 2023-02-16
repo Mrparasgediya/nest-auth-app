@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common/exceptions';
 import { Pokemon, Power } from '@prisma/client';
 import PrismaService from 'src/prisma/prisma.service';
 import PokemonDto from './dto/pokemon.dto';
@@ -77,6 +78,53 @@ export class PokemonService {
 
     await this.prismaService.pokemon.delete({
       where: { id },
+    });
+  }
+  async deletePokemonPower(pokemonId: number, powerId: number) {
+    const foundPokemonPower = await this.prismaService.powerPokemon.findFirst({
+      where: {
+        pokemonId,
+        powerId,
+      },
+    });
+    if (!foundPokemonPower) {
+      throw new NotFoundException('Pokmon do not have entered power');
+    }
+    await this.prismaService.powerPokemon.deleteMany({
+      where: {
+        id: foundPokemonPower.id,
+      },
+    });
+  }
+  async addPowerToPokemonById(id: number, powers: number[]) {
+    const foundPokemonPower = await this.prismaService.powerPokemon.findMany({
+      where: {
+        powerId: {
+          in: powers,
+        },
+        pokemonId: id,
+      },
+    });
+    const foundPowersId = foundPokemonPower.map(
+      (currPower) => currPower.powerId,
+    );
+    const powersToAdd = foundPokemonPower.length
+      ? powers.reduce(
+          (powersToAdd: number[], currPower) =>
+            foundPowersId.includes(currPower)
+              ? powersToAdd
+              : powersToAdd.concat([currPower]),
+          [],
+        )
+      : powers;
+    if (!powersToAdd.length) {
+      throw new BadRequestException('No Powers To Add');
+    }
+    await this.prismaService.powerPokemon.createMany({
+      data: powersToAdd.map((powerId) => ({
+        pokemonId: id,
+        powerId,
+      })),
     });
   }
 }

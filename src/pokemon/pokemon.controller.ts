@@ -26,8 +26,16 @@ export class PokemonController {
     return this.pokemonService.deleteById(+params.id);
   }
 
-  // @Get(':id/powers')
-  // getPokemonPowers(@Param() Params){
-  //   return this.pokemonService.
-  // }
+  @Post(':id/powers')
+  addPowerToPokemonById(
+    @Param() { id },
+    @Body() payload: { powers: PokemonDto['powers'] },
+  ) {
+    return this.pokemonService.addPowerToPokemonById(+id, payload.powers);
+  }
+
+  @Delete(':id/powers/:powerId')
+  deletePokemonPowerById(@Param() params) {
+    return this.pokemonService.deletePokemonPower(+params.id, +params.powerId);
+  }
 }
