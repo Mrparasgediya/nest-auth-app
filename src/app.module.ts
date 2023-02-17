@@ -2,11 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import AuthModule from './auth/auth.module';
 import BookMarkModule from './bookmarks/bookmarks.module';
-import { CoreModule } from './core/core.module';
-import { validate } from './core/env.validation';
-import { UsersModule } from './users/users.module';
 import { PokemonModule } from './pokemon/pokemon.module';
 import PowerModule from './power/power.module';
+import { UsersModule } from './users/users.module';
+import { validate } from './utils/env.validation';
 
 @Module({
   imports: [
@@ -15,7 +14,6 @@ import PowerModule from './power/power.module';
       isGlobal: true,
       validate,
     }),
-    CoreModule,
     UsersModule,
     AuthModule,
     BookMarkModule,

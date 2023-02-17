@@ -1,116 +1,110 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { randomUUID } from 'crypto';
-import BookMarkStore from 'src/core/bookmark.store';
-import { UserStore } from 'src/core/user.store';
-import UserEntity from 'src/users/user.entity';
-import BookMarkEntity from './bookmark.entity';
+import PrismaService from 'src/prisma/prisma.service';
 import BookMarkDTO from './dto/bookmark.dto';
 
 @Injectable()
 export default class BookMarkService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly userStore: UserStore,
-    private readonly bookMarkStore: BookMarkStore,
+    private readonly prismaService: PrismaService,
   ) {}
 
-  private getUserFromAuthorizationHeader(
-    authorizationHeader: string,
-  ): UserEntity {
-    if (!authorizationHeader) {
-      throw new UnauthorizedException('Access Denied!');
-    }
-    const [, token] = authorizationHeader.split(' ');
-    if (!token) {
-      throw new UnauthorizedException('Access Denied!');
-    }
-    const user = this.jwtService.decode(token);
-    if (typeof user === 'string' || (user && !user.id)) {
-      throw new BadRequestException('Please Login Again!');
-    }
-    return this.userStore.findUserById(user.id);
-  }
-
-  addBookMark(bookMarkData: BookMarkDTO, userId: string) {
+  async addBookMark(bookMarkData: BookMarkDTO, userId: string) {
     const { description, name, url } = bookMarkData;
-    const foundUser = this.userStore.findUserById(userId);
+    const foundUser = await this.prismaService.user.findFirst({
+      where: { id: userId },
+      select: { id: true },
+    });
     if (!foundUser) {
       throw new NotFoundException('User not found!');
     }
-    const newBookMark: BookMarkEntity = {
-      description,
-      id: randomUUID(),
-      name,
-      url,
-      userId: foundUser.id,
-    };
-    this.bookMarkStore.addBookMark(newBookMark);
-    return newBookMark;
+
+    return this.prismaService.bookMark.create({
+      data: {
+        url,
+        description,
+        name,
+        userId: foundUser.id,
+      },
+    });
   }
 
-  getBookMarks(userId: string) {
-    const foundUser = this.userStore.findUserById(userId);
+  async getBookMarks(userId: string) {
+    const foundUser = await this.prismaService.user.findFirst({
+      where: { id: userId },
+    });
     if (!foundUser) {
       throw new NotFoundException('User not found!');
     }
-    return this.bookMarkStore
-      .getBookMarks()
-      .filter((currBookMark) => currBookMark.userId === foundUser.id);
+    return this.prismaService.bookMark.findMany({
+      where: {
+        userId: foundUser.id,
+      },
+    });
   }
 
-  getBookMarkById(id: string, userId: string) {
-    const foundUser = this.userStore.findUserById(userId);
+  async getBookMarkById(id: string, userId: string) {
+    const foundUser = await this.prismaService.user.findFirst({
+      where: { id: userId },
+    });
     if (!foundUser) {
       throw new NotFoundException('User not found!');
     }
-    const foundBookMark = this.bookMarkStore.findBookMarkOfUserById(
-      id,
-      foundUser.id,
-    );
+    const foundBookMark = await this.prismaService.bookMark.findFirst({
+      where: {
+        id,
+        userId,
+      },
+    });
     if (!foundBookMark) {
       throw new NotFoundException('BookMark not found!');
     }
     return foundBookMark;
   }
 
-  deleteBookMark(id: string, userId: string) {
-    const foundUser = this.userStore.findUserById(userId);
+  async deleteBookMark(id: string, userId: string) {
+    const foundUser = await this.prismaService.user.findFirst({
+      where: { id: userId },
+    });
     if (!foundUser) {
       throw new NotFoundException('User not found!');
     }
-    const foundBookMark = this.bookMarkStore.findBookMarkOfUserById(
-      id,
-      foundUser.id,
-    );
+    const foundBookMark = await this.prismaService.bookMark.findFirst({
+      where: { id, userId },
+    });
     if (!foundBookMark) {
       throw new NotFoundException('Bookmark Not Found!');
     }
-    this.bookMarkStore.deleteBookMarkById(id, foundUser.id);
+    await this.prismaService.bookMark.delete({ where: { id } });
   }
 
-  updateBookMark(id: string, userId: string, bookMarkData: BookMarkDTO) {
-    const foundUser = this.userStore.findUserById(userId);
+  async updateBookMark(id: string, userId: string, bookMarkData: BookMarkDTO) {
+    const foundUser = await this.prismaService.user.findFirst({
+      where: { id: userId },
+    });
     if (!foundUser) {
       throw new NotFoundException('User not found!');
     }
-    const foundBookMark = this.bookMarkStore.findBookMarkOfUserById(
-      id,
-      foundUser.id,
-    );
+    const foundBookMark = await this.prismaService.bookMark.findFirst({
+      where: {
+        id,
+        userId,
+      },
+    });
     if (!foundBookMark) {
-      throw new NotFoundException('BookMark Not Found!');
+      throw new NotFoundException('Bookmark not found!');
     }
-    const updatedBookMark = { ...foundBookMark, ...bookMarkData };
-    return this.bookMarkStore.updateBookMarkById(
-      id,
-      foundUser.id,
-      updatedBookMark,
-    );
+    const { description, name, url } = bookMarkData;
+    return this.prismaService.bookMark.update({
+      where: {
+        id: foundBookMark.id,
+      },
+      data: {
+        description,
+        name,
+        url,
+      },
+    });
   }
 }

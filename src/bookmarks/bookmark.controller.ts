@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   Param,
   Post,
   Put,
@@ -22,7 +21,6 @@ export default class BookMarkController {
 
   @Get()
   getAllBookmarks(@User() user: JwtPayload) {
-    console.log('this is user ', user);
     return this.bookMarkService.getBookMarks(user.id);
   }
 

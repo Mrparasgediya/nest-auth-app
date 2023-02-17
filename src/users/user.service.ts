@@ -1,25 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserStore } from 'src/core/user.store';
-import UserEntity from './user.entity';
+import PrismaService from 'src/prisma/prisma.service';
 
 @Injectable()
 export default class UserService {
-  constructor(private readonly usersStore: UserStore) {}
-
-  private getUserForPayload(user: UserEntity) {
-    return { id: user.id, email: user.email };
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   getAllUsers() {
-    return this.usersStore
-      .getUsers()
-      .map((user) => this.getUserForPayload(user));
+    return this.prisma.user.findMany({
+      select: {
+        email: true,
+        id: true,
+      },
+    });
   }
-  getUserById(id: string) {
-    const foundUser = this.usersStore.findUserById(id);
+  async getUserById(id: string) {
+    const foundUser = await this.prisma.user.findFirst({
+      where: { id },
+      select: { email: true, id: true },
+    });
     if (!foundUser) {
       throw new NotFoundException('User not found!');
     }
-    return this.getUserForPayload(foundUser);
+    return foundUser;
   }
 }

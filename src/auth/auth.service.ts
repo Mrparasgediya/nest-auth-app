@@ -1,46 +1,41 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UserStore } from 'src/core/user.store';
-import { AuthDTO } from './dto/auth.dto';
-import { compareSync, hashSync } from 'bcrypt';
-import { randomUUID } from 'crypto';
-import UserEntity from 'src/users/user.entity';
 import { JwtService } from '@nestjs/jwt/dist';
+import { compareSync, hashSync } from 'bcrypt';
+import PrismaService from 'src/prisma/prisma.service';
+import { AuthDTO } from './dto/auth.dto';
 
 @Injectable()
 export default class AuthService {
   constructor(
-    private readonly userStore: UserStore,
     private readonly jwtService: JwtService,
+    private readonly prismaService: PrismaService,
   ) {}
 
-  signupUser(authData: AuthDTO) {
+  async signupUser(authData: AuthDTO) {
     const { email, password } = authData;
 
-    const foundUserWithEmail = this.userStore.findUserByEmail(email);
+    const foundUserWithEmail = await this.prismaService.user.findFirst({
+      where: { email },
+    });
     if (foundUserWithEmail) {
       throw new BadRequestException('Entered email is already exists!');
     }
 
     const hashedPassword = hashSync(password, 10);
-    const newUser: UserEntity = {
-      id: randomUUID(),
-      email,
-      password: hashedPassword,
-    };
-    this.userStore.addUser(newUser);
-
-    console.log(newUser);
-
-    return {
-      id: newUser.id,
-      email,
-    };
+    return this.prismaService.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+      },
+    });
   }
 
-  signInUser(authData: AuthDTO) {
+  async signInUser(authData: AuthDTO) {
     const { email, password } = authData;
 
-    const foundUser = this.userStore.findUserByEmail(email);
+    const foundUser = await this.prismaService.user.findFirst({
+      where: { email },
+    });
     if (!foundUser) {
       throw new BadRequestException('Invalid Email!');
     }
